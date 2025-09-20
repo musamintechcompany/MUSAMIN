@@ -1,0 +1,111 @@
+<?php
+
+namespace App\Http\Controllers\Auth;
+
+use App\Http\Controllers\Controller;
+use Illuminate\Http\RedirectResponse;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
+
+class EmailVerificationController extends Controller
+{
+    /**
+     * Handle an incoming email verification request.
+     */
+    public function __invoke(Request $request): RedirectResponse
+    {
+        $request->validate([
+            'code' => ['required', 'string', 'size:6', 'regex:/^[0-9]{6}$/']
+        ]);
+
+        $user = $request->user();
+
+        if ($user->verifyWithCode($request->code)) {
+            return redirect()->route('dashboard')
+                ->with('status', 'Email verified successfully! Welcome aboard!');
+        }
+
+        return back()->withErrors([
+            'code' => 'The verification code is invalid or has expired.',
+        ]);
+    }
+
+    /**
+     * Initiate email change process.
+     */
+    public function initiateChange(Request $request)
+    {
+        try {
+            $user = $request->user();
+            
+            $request->validate([
+                'email' => ['required', 'email', 'unique:users,email,' . $user->id . ',id']
+            ]);
+
+            // Check if email verification is required from admin settings
+            $settings = \App\Models\Setting::first();
+            $verificationRequired = $settings ? $settings->email_verification_required : false;
+
+            if ($verificationRequired) {
+                // Send verification code
+                $user->initiateEmailChange($request->email);
+                
+                return response()->json([
+                    'success' => true,
+                    'verification_required' => true,
+                    'message' => 'Verification code sent to your new email address'
+                ]);
+            } else {
+                // Update email directly
+                $user->update(['email' => $request->email]);
+                
+                return response()->json([
+                    'success' => true,
+                    'verification_required' => false,
+                    'message' => 'Email updated successfully'
+                ]);
+            }
+        } catch (\Illuminate\Validation\ValidationException $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'The email address is already taken or invalid.'
+            ], 422);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'An error occurred while changing email.'
+            ], 500);
+        }
+    }
+
+    /**
+     * Verify and complete email change.
+     */
+    public function verifyChange(Request $request)
+    {
+        try {
+            $request->validate([
+                'verification_code' => ['required', 'string', 'size:6']
+            ]);
+
+            $user = $request->user();
+            
+            if ($user->completeEmailChange($request->verification_code)) {
+                return response()->json([
+                    'success' => true,
+                    'message' => 'Email changed successfully'
+                ]);
+            }
+
+            return response()->json([
+                'success' => false,
+                'message' => 'Invalid or expired verification code'
+            ], 400);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'An error occurred while verifying email change.'
+            ], 500);
+        }
+    }
+}
