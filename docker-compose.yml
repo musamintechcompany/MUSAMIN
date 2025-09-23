@@ -21,8 +21,8 @@ services:
     networks:
       - musamin-network
       - coolify
-    ports:
-      - "8083:9000"
+    expose:
+      - "9000"
 
   redis:
     image: redis:7-alpine
@@ -42,8 +42,8 @@ services:
     restart: unless-stopped
     working_dir: /var/www/html
     command: php artisan reverb:start --host=0.0.0.0 --port=8080
-    ports:
-      - "8084:8080"
+    expose:
+      - "8080"
     volumes:
       - app_storage:/var/www/html/storage
     environment:
