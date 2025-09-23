@@ -19,10 +19,7 @@ RUN apt-get update && apt-get install -y \
     libwebp-dev \
     libxpm-dev \
     libicu-dev \
-    jpegoptim optipng pngquant gifsicle \
-    vim \
     supervisor \
-    cron \
     && rm -rf /var/lib/apt/lists/*
 
 # Install PHP extensions
@@ -45,17 +42,11 @@ RUN pecl install redis && docker-php-ext-enable redis
 # Install Composer
 COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
 
-# Copy composer files first
-COPY composer.json composer.lock ./
+# Copy all files
+COPY . /var/www/html/
 
-# Install PHP dependencies
-RUN composer install --no-dev --optimize-autoloader --no-interaction --no-scripts
-
-# Copy application files
-COPY . .
-
-# Run composer scripts
-RUN composer run-script post-autoload-dump
+# Install dependencies
+RUN composer install --no-dev --optimize-autoloader
 
 # Set permissions
 RUN chown -R www-data:www-data /var/www/html \
@@ -64,28 +55,20 @@ RUN chown -R www-data:www-data /var/www/html \
 
 # Create supervisor config for queue worker
 RUN echo '[program:laravel-queue]' > /etc/supervisor/conf.d/laravel-queue.conf \
-    && echo 'process_name=%(program_name)s_%(process_num)02d' >> /etc/supervisor/conf.d/laravel-queue.conf \
-    && echo 'command=php /var/www/html/artisan queue:work --sleep=3 --tries=3 --max-time=3600' >> /etc/supervisor/conf.d/laravel-queue.conf \
+    && echo 'command=php /var/www/html/artisan queue:work --sleep=3 --tries=3' >> /etc/supervisor/conf.d/laravel-queue.conf \
     && echo 'autostart=true' >> /etc/supervisor/conf.d/laravel-queue.conf \
     && echo 'autorestart=true' >> /etc/supervisor/conf.d/laravel-queue.conf \
-    && echo 'user=www-data' >> /etc/supervisor/conf.d/laravel-queue.conf \
-    && echo 'numprocs=2' >> /etc/supervisor/conf.d/laravel-queue.conf \
-    && echo 'redirect_stderr=true' >> /etc/supervisor/conf.d/laravel-queue.conf \
-    && echo 'stdout_logfile=/var/www/html/storage/logs/queue.log' >> /etc/supervisor/conf.d/laravel-queue.conf
+    && echo 'user=www-data' >> /etc/supervisor/conf.d/laravel-queue.conf
 
-# Create startup script
-RUN echo '#!/bin/bash' > /usr/local/bin/start.sh \
-    && echo 'php artisan config:cache' >> /usr/local/bin/start.sh \
-    && echo 'php artisan route:cache' >> /usr/local/bin/start.sh \
-    && echo 'php artisan view:cache' >> /usr/local/bin/start.sh \
-    && echo 'php artisan migrate --force' >> /usr/local/bin/start.sh \
-    && echo 'php artisan storage:link' >> /usr/local/bin/start.sh \
-    && echo 'supervisord -c /etc/supervisor/supervisord.conf &' >> /usr/local/bin/start.sh \
-    && echo 'php-fpm' >> /usr/local/bin/start.sh \
-    && chmod +x /usr/local/bin/start.sh
+# Start script
+RUN echo '#!/bin/bash' > /start.sh \
+    && echo 'php artisan config:cache' >> /start.sh \
+    && echo 'php artisan migrate --force' >> /start.sh \
+    && echo 'php artisan storage:link' >> /start.sh \
+    && echo 'supervisord -n &' >> /start.sh \
+    && echo 'php-fpm' >> /start.sh \
+    && chmod +x /start.sh
 
-# Expose port 9000
 EXPOSE 9000
 
-# Start services
-CMD ["/usr/local/bin/start.sh"]
+CMD ["/start.sh"]
