@@ -16,8 +16,9 @@ RUN apt-get update && apt-get install -y \
     libzip-dev \
     libfreetype6-dev \
     libjpeg62-turbo-dev \
-    libmcrypt-dev \
-    libgd-dev \
+    libwebp-dev \
+    libxpm-dev \
+    libicu-dev \
     jpegoptim optipng pngquant gifsicle \
     vim \
     supervisor \
@@ -25,17 +26,18 @@ RUN apt-get update && apt-get install -y \
     && rm -rf /var/lib/apt/lists/*
 
 # Install PHP extensions
-RUN docker-php-ext-configure gd --with-freetype --with-jpeg \
+RUN docker-php-ext-configure gd --with-freetype --with-jpeg --with-webp \
+    && docker-php-ext-configure intl \
     && docker-php-ext-install -j$(nproc) \
-    pdo_mysql \
-    mbstring \
-    exif \
-    pcntl \
-    bcmath \
-    gd \
-    zip \
-    intl \
-    opcache
+        pdo_mysql \
+        mbstring \
+        exif \
+        pcntl \
+        bcmath \
+        gd \
+        zip \
+        intl \
+        opcache
 
 # Install Redis extension
 RUN pecl install redis && docker-php-ext-enable redis
