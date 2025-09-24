@@ -60,13 +60,16 @@ RUN echo '[program:laravel-queue]' > /etc/supervisor/conf.d/laravel-queue.conf \
     && echo 'autorestart=true' >> /etc/supervisor/conf.d/laravel-queue.conf \
     && echo 'user=www-data' >> /etc/supervisor/conf.d/laravel-queue.conf
 
+# Configure PHP-FPM to listen on port 9000
+RUN echo 'listen = 0.0.0.0:9000' >> /usr/local/etc/php-fpm.d/www.conf
+
 # Start script
 RUN echo '#!/bin/bash' > /start.sh \
     && echo 'php artisan config:cache' >> /start.sh \
     && echo 'php artisan migrate --force' >> /start.sh \
     && echo 'php artisan storage:link' >> /start.sh \
     && echo 'supervisord -n &' >> /start.sh \
-    && echo 'php-fpm' >> /start.sh \
+    && echo 'php-fpm -F' >> /start.sh \
     && chmod +x /start.sh
 
 EXPOSE 9000
