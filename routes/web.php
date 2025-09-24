@@ -12,7 +12,11 @@ use App\Http\Controllers\IdeaController;
 use App\Http\Controllers\ForgotPasswordController;
 
 Route::get('/', function () {
-    return view('welcome');
+    return 'Laravel is working!';
+});
+
+Route::get('/test', function () {
+    return 'Test route works!';
 });
 
 Route::get('/home', function () {
@@ -135,10 +139,10 @@ Route::middleware([
     Route::get('/support', function () {
         return view('support.index');
     })->name('support.index');
-    
+
     Route::get('/support/faqs', [App\Http\Controllers\FaqController::class, 'index'])
         ->name('support.faqs');
-    
+
     Route::get('/help', [App\Http\Controllers\HelpCenterController::class, 'index'])
         ->name('help.center');
     Route::get('/help/search', [App\Http\Controllers\HelpCenterController::class, 'search'])
@@ -276,7 +280,7 @@ Route::middleware([
         ->name('follow.status');
     Route::post('/follow-status', [App\Http\Controllers\FollowController::class, 'batchStatus'])
         ->name('follow.batch-status');
-    
+
 
 
 
