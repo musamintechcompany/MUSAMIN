@@ -1,0 +1,15 @@
+[variables]
+IS_LARAVEL = "yes"
+NIXPACKS_METADATA = "php"
+
+[phases.setup]
+nixPkgs = ["php82", "nginx", "nodejs_18", "composer"]
+
+[phases.install]
+cmds = ["composer install --no-dev --optimize-autoloader"]
+
+[phases.build]
+cmds = ["cp .env.example .env", "php artisan key:generate"]
+
+[start]
+cmd = "php-fpm -D && nginx -g 'daemon off;'"
