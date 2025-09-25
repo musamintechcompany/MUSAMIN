@@ -317,11 +317,6 @@ Route::prefix('cart')->group(function () {
         ->name('cart.checkout');
 });
 
-// Email verification routes
-Route::post('/email/verify', App\Http\Controllers\Auth\EmailVerificationController::class)
-    ->middleware(['auth'])
-    ->name('email.verify.custom');
-
 Route::post('/email/verification-notification', function (Request $request) {
     $user = $request->user();
     $user->generateNewVerificationCode();
@@ -334,7 +329,7 @@ Route::post('/email/verification-notification', function (Request $request) {
     return back()->with('status', 'verification-link-sent');
 })->middleware(['auth', 'throttle:6,1'])->name('verification.send');
 
-// Email Change routes (outside verified middleware)
+// Email Change routes
 Route::post('/email/change', [App\Http\Controllers\Auth\EmailVerificationController::class, 'initiateChange'])
     ->middleware(['auth'])
     ->name('email.change');
