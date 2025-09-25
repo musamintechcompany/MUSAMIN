@@ -1,5 +1,19 @@
 <?php
 
+// Temporary debug route - remove after checking
+Route::get('/debug-assets', function() {
+    $publicPath = public_path();
+    $buildPath = public_path('build');
+    
+    return [
+        'public_exists' => file_exists($publicPath),
+        'build_exists' => file_exists($buildPath),
+        'public_contents' => file_exists($publicPath) ? scandir($publicPath) : 'not found',
+        'build_contents' => file_exists($buildPath) ? scandir($buildPath) : 'not found',
+        'manifest_exists' => file_exists(public_path('build/manifest.json')),
+    ];
+});
+
 use Illuminate\Support\Facades\Route;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Broadcast;
