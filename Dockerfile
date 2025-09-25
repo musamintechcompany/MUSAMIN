@@ -33,6 +33,9 @@ RUN composer install --no-dev --optimize-autoloader
 # Build assets for production
 RUN npm run build
 
+# Debug: Check if build files were created
+RUN ls -la public/ && ls -la public/build/ || echo "Build directory not found"
+
 # Set permissions
 RUN chown -R www-data:www-data /var/www/html/storage /var/www/html/bootstrap/cache
 RUN chmod -R 775 /var/www/html/storage /var/www/html/bootstrap/cache
