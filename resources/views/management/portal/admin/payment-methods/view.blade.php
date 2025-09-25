@@ -1,4 +1,4 @@
-<x-portal-layout title="View Payment Method">
+<x-app-layout>
 <div class="p-6">
     <div class="flex justify-between items-center mb-6">
         <h1 class="text-2xl font-bold text-gray-900">Payment Method Details</h1>
@@ -160,4 +160,4 @@
         @endif
     </div>
 </div>
-</x-portal-layout>
+</x-app-layout>
