@@ -1,6 +1,6 @@
 FROM php:8.2-fpm
 
-# Install system dependencies and PHP extensions in one layer
+# Install system dependencies and PHP extensions
 RUN apt-get update && apt-get install -y \
     git curl zip unzip supervisor nginx \
     libpng-dev libonig-dev libxml2-dev libzip-dev \
@@ -19,16 +19,18 @@ WORKDIR /var/www/html
 # Copy application files
 COPY . .
 
-# Install dependencies (without dev dependencies)
+# Install dependencies
 RUN composer install --no-dev --optimize-autoloader
 
 # Set permissions
-RUN chown -R www-data:www-data /var/www/html/storage
-RUN chmod -R 775 /var/www/html/storage
+RUN chown -R www-data:www-data /var/www/html/storage /var/www/html/bootstrap/cache
+RUN chmod -R 775 /var/www/html/storage /var/www/html/bootstrap/cache
 
-# Copy nginx config
+# Copy Nginx and Supervisor configs
 COPY nginx.conf /etc/nginx/sites-available/default
+COPY supervisord.conf /etc/supervisor/conf.d/supervisord.conf
 
 EXPOSE 80
 
-CMD service nginx start && php-fpm
+# Start Supervisor (manages both nginx & php-fpm)
+CMD ["/usr/bin/supervisord", "-n", "-c", "/etc/supervisor/conf.d/supervisord.conf"]
