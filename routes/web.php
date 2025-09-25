@@ -12,11 +12,7 @@ use App\Http\Controllers\IdeaController;
 use App\Http\Controllers\ForgotPasswordController;
 
 Route::get('/', function () {
-    return 'Laravel is working!';
-});
-
-Route::get('/test', function () {
-    return 'Test route works!';
+    return view('welcome');
 });
 
 Route::get('/home', function () {
