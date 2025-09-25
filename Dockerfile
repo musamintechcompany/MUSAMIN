@@ -21,8 +21,8 @@ WORKDIR /var/www/html
 # Copy package files first for better caching
 COPY package*.json ./
 
-# Install npm dependencies
-RUN npm ci
+# Install npm dependencies (including dev dependencies for build)
+RUN npm ci --include=dev
 
 # Copy application files
 COPY . .
