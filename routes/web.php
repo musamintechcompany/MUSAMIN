@@ -320,7 +320,7 @@ Route::prefix('cart')->group(function () {
 // Email verification routes
 Route::post('/email/verify', App\Http\Controllers\Auth\EmailVerificationController::class)
     ->middleware(['auth'])
-    ->name('verification.verify');
+    ->name('email.verify.custom');
 
 Route::post('/email/verification-notification', function (Request $request) {
     $user = $request->user();
