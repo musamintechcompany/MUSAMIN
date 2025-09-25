@@ -46,5 +46,8 @@ COPY supervisord.conf /etc/supervisor/conf.d/supervisord.conf
 
 EXPOSE 80
 
-# Start Supervisor (manages both nginx & php-fpm)
+# Create Laravel caches for production
+RUN php artisan config:cache && php artisan route:cache && php artisan view:cache
+
+# Start Supervisor (manages nginx, php-fpm, reverb & queue workers)
 CMD ["/usr/bin/supervisord", "-n", "-c", "/etc/supervisor/conf.d/supervisord.conf"]
