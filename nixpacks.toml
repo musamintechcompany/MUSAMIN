@@ -13,4 +13,4 @@ cmds = ['composer install --no-dev --optimize-autoloader']
 cmds = ['cp .env.example .env || true', 'php artisan key:generate']
 
 [start]
-cmd = 'cp nginx.conf /nginx.conf && (php-fpm -y /etc/php82/php-fpm.conf & nginx -c /nginx.conf)'
+cmd = 'mkdir -p /var/log/nginx && cp nginx.conf /nginx.conf && nginx -c /nginx.conf & php-fpm -F'
