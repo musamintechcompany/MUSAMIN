@@ -1,0 +1,18 @@
+[phases.setup]
+nixPkgs = [
+  '(php.withExtensions (pe: pe.enabled ++ []))',
+  'nginx',
+  'libmysqlclient',
+  'phpPackages.composer',
+  'nodejs_18',
+  'npm-9_x',
+]
+
+[phases.install]
+cmds = ['composer install --no-dev --optimize-autoloader']
+
+[phases.build]
+cmds = ['cp .env.example .env || true', 'php artisan key:generate']
+
+[start]
+cmd = 'mkdir -p /var/log/nginx && cp nginx.conf /nginx.conf && (php-fpm -y /assets/php-fpm.conf & nginx -c /nginx.conf)'
