@@ -2,7 +2,7 @@ FROM php:8.2-fpm
 
 # Install system dependencies and PHP extensions in one layer
 RUN apt-get update && apt-get install -y \
-    git curl zip unzip supervisor \
+    git curl zip unzip supervisor nginx \
     libpng-dev libonig-dev libxml2-dev libzip-dev \
     && docker-php-ext-install -j$(nproc) pdo pdo_mysql mbstring exif pcntl bcmath gd zip \
     && pecl install redis \
@@ -26,6 +26,9 @@ RUN composer install --no-dev --optimize-autoloader
 RUN chown -R www-data:www-data /var/www/html/storage
 RUN chmod -R 775 /var/www/html/storage
 
-EXPOSE 9000
+# Copy nginx config
+COPY nginx.conf /etc/nginx/sites-available/default
 
-CMD ["php-fpm"]
+EXPOSE 80
+
+CMD service nginx start && php-fpm
