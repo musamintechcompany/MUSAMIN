@@ -17,7 +17,6 @@ services:
       - APP_DEBUG=false
     depends_on:
       - database
-      - redis
     networks:
       - laravel-network
 
@@ -51,59 +50,8 @@ services:
     networks:
       - laravel-network
 
-  # Redis for Cache, Sessions, Queues, Reverb
-  redis:
-    image: redis:alpine
-    container_name: laravel-redis
-    restart: unless-stopped
-    command: redis-server --appendonly yes
-    volumes:
-      - redisdata:/data
-    networks:
-      - laravel-network
-
-  # Queue Worker
-  queue:
-    build:
-      context: .
-      dockerfile: Dockerfile
-    container_name: laravel-queue
-    restart: unless-stopped
-    working_dir: /var/www/html
-    volumes:
-      - ./:/var/www/html
-      - ./storage:/var/www/html/storage
-    command: php artisan queue:work --sleep=3 --tries=3 --max-time=3600
-    depends_on:
-      - app
-      - database
-      - redis
-    networks:
-      - laravel-network
-
-  # Laravel Reverb (WebSockets)
-  reverb:
-    build:
-      context: .
-      dockerfile: Dockerfile
-    container_name: laravel-reverb
-    restart: unless-stopped
-    working_dir: /var/www/html
-    volumes:
-      - ./:/var/www/html
-      - ./storage:/var/www/html/storage
-    command: php artisan reverb:start --host=0.0.0.0 --port=8080
-    ports:
-      - "8080:8080"
-    depends_on:
-      - app
-      - redis
-    networks:
-      - laravel-network
-
 volumes:
   dbdata:
-  redisdata:
 
 networks:
   laravel-network:
