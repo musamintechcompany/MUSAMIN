@@ -1,0 +1,8 @@
+FROM serversideup/php:8.2-fpm-nginx
+
+WORKDIR /var/www/html
+COPY . .
+RUN composer install --no-dev --optimize-autoloader
+RUN chown -R www-data:www-data storage && chmod -R 775 storage
+
+EXPOSE 80
