@@ -3,7 +3,7 @@ IS_LARAVEL = "yes"
 NIXPACKS_METADATA = "php"
 
 [phases.setup]
-nixPkgs = ["php82", "nginx", "nodejs_18", "composer"]
+nixPkgs = ["php82", "nginx", "nodejs_18", "phpPackages.composer"]
 
 [phases.install]
 cmds = ["composer install --no-dev --optimize-autoloader"]
